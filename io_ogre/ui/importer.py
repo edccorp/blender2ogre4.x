@@ -43,9 +43,9 @@ class _OgreCommonImport_(object):
         if context.mode != 'EDIT_MESH':
             return True
 
-    def __init__(self):
+#    def __init__(self):
         # Check that converter is setup
-        self.converter = detect_converter_type()
+#        self.converter = detect_converter_type()
 
     def invoke(self, context, event):
         """
@@ -57,6 +57,9 @@ class _OgreCommonImport_(object):
         """
         if self.filepath:
             return self.execute(context)
+
+        if not hasattr(self, "converter"):
+            self.converter = detect_converter_type()
 
         # Update the interface with the config values
         for key, value in config.CONFIG.items():
@@ -73,7 +76,10 @@ class _OgreCommonImport_(object):
     def draw(self, context):
         layout = self.layout
         self.called_from_UI = True
-
+        
+        if not hasattr(self, "converter"):
+            self.converter = detect_converter_type()
+            
         if self.converter == "unknown":
             layout.label(text="No converter found! Please check your preferences.", icon='ERROR')
         else:
@@ -115,6 +121,9 @@ class _OgreCommonImport_(object):
 
     def execute(self, context):
         """ Calls to this Operator can set unfiltered filepaths, ensure the file extension is .mesh, .xml or .scene. """
+       
+        if not hasattr(self, "converter"):
+            self.converter = detect_converter_type()
         if not self.filepath or not (\
            self.filepath.endswith(".mesh") or \
            self.filepath.endswith(".xml") or \
@@ -348,7 +357,3 @@ class OP_ogre_import(bpy.types.Operator, _OgreCommonImport_):
     bl_label = "Import Ogre"
     bl_options = {'REGISTER'}
     # import logic is contained in the subclass
-
-    def __init__(self, *args, **kwargs):
-        bpy.types.Operator.__init__(self, *args, **kwargs)
-        _OgreCommonImport_.__init__(self)

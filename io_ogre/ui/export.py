@@ -41,11 +41,13 @@ class _OgreCommonExport_(object):
         if context.active_object and context.mode != 'EDIT_MESH':
             return True
 
-    def __init__(self):
+#    def __init__(self):
         # Check that converter is setup
-        self.converter = detect_converter_type()
+#        self.converter = detect_converter_type()
 
     def invoke(self, context, event):
+        if not hasattr(self, "converter"):
+            self.converter = detect_converter_type()        
         # Update the interface with the config values
         for key, value in config.CONFIG.items():
             for prefix in ["EX_", "EX_Vx_", "EX_V1_", "EX_V2_"]:
@@ -74,6 +76,9 @@ class _OgreCommonExport_(object):
     def draw(self, context):
         layout = self.layout
         self.called_from_UI = True
+        
+        if not hasattr(self, "converter"):
+            self.converter = detect_converter_type()
 
         if self.converter == "unknown":
             layout.label(text="No converter found! Please check your preferences.", icon='ERROR')
@@ -123,6 +128,9 @@ class _OgreCommonExport_(object):
 
     def execute(self, context):
         Report.reset()
+
+        if not hasattr(self, "converter"):
+            self.converter = detect_converter_type()
 
         # Add warning about missing XML converter
         if self.converter == "unknown":
@@ -495,7 +503,3 @@ class OP_ogre_export(bpy.types.Operator, _OgreCommonExport_):
     bl_label = "Export Ogre"
     bl_options = {'REGISTER'}
     # export logic is contained in the subclass
-
-    def __init__(self, *args, **kwargs):
-        bpy.types.Operator.__init__(self, *args, **kwargs)
-        _OgreCommonExport_.__init__(self)

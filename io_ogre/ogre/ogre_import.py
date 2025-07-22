@@ -1229,6 +1229,16 @@ def bCreateSubMeshes(meshData, meshName):
             bsdf = mat.node_tree.nodes["Principled BSDF"]
             bsdf.location = -300, 0
             
+            # Apply diffuse color from parsed material data
+            mdata = meshData.get("materials", {}).get(subMeshName, {})
+            if "diffuse" in mdata:
+                diffuse = mdata["diffuse"]
+                while len(diffuse) < 4:
+                    diffuse.append(1.0)
+                bsdf.inputs["Base Color"].default_value = tuple(diffuse[:4])
+                mat.diffuse_color = tuple(diffuse[:4])  # For viewport shading
+            
+            
             if 'texture' in matInfo:
                 texturePath = matInfo['texture']
                 if texturePath:
