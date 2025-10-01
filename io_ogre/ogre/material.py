@@ -17,7 +17,7 @@ from bpy_extras import io_utils
 from bpy_extras import node_shader_utils
 from datetime import datetime
 from itertools import chain
-from mathutils import Vector
+from mathutils import Vector, Color
 from os.path import join, split, splitext
 
 logger = logging.getLogger('material')
@@ -201,20 +201,19 @@ class OgreMaterialGenerator(object):
                     self.w.iword('cull_hardware none').nl()
                     self.w.iword('depth_write off').nl()
 
-            if config.get('USE_FFP_PARAMETERS') is True:
-                # arbitrary bad translation from PBR to Blinn Phong
-                # derive proportions from metallic
-                bf = 1.0 - mat_wrapper.metallic
-                mf = max(0.04, mat_wrapper.metallic)
-                # derive specular color
-                sc = mathutils.Color(color[:3]) * mf + (1.0 - mf) * mathutils.Color((1, 1, 1)) * (1.0 - mat_wrapper.roughness)
-                si = (1.0 - mat_wrapper.roughness) * 128
+            metallic = mat_wrapper.metallic
+            roughness = mat_wrapper.roughness
+            bf = 1.0 - metallic
+            mf = max(0.04, metallic)
+            sc = Color(color[:3]) * mf + Color((1.0, 1.0, 1.0)) * (1.0 - mf) * (1.0 - roughness)
+            si = (1.0 - roughness) * 128
 
+            if config.get('USE_FFP_PARAMETERS') is True:
                 self.w.iword('diffuse').round(color[0]*bf).round(color[1]*bf).round(color[2]*bf).round(alpha).nl()
                 self.w.iword('specular').round(sc[0]).round(sc[1]).round(sc[2]).round(alpha).round(si, 3).nl()
             else:
                 self.w.iword('diffuse').round(color[0]).round(color[1]).round(color[2]).round(alpha).nl()
-                self.w.iword('specular').round(mat_wrapper.roughness).round(mat_wrapper.metallic).real(0).real(0).real(0).nl()
+                self.w.iword('specular').round(sc[0]).round(sc[1]).round(sc[2]).round(alpha).round(si, 3).nl()
                 self.generate_rtshader_system(textures)
 
             for name in dir(mat):   #mat.items() - items returns custom props not pyRNA:
