@@ -195,8 +195,30 @@ class OgreMaterialv2JsonGenerator(object):
 
         # Set up specular parameters
         logger.debug("Specular params")
+        base_color = list(bsdf.base_color[0:3])
+        metallic = max(0.0, min(1.0, bsdf.metallic))
+        specular = max(0.0, min(1.0, getattr(bsdf, "specular", getattr(material, "specular_intensity", 0.5))))
+        specular_tint = max(0.0, min(1.0, getattr(bsdf, "specular_tint", 0.0)))
+
+        dielectric_f0 = specular * 0.08
+        max_base_component = max(base_color)
+        if max_base_component > 0.0:
+            normalized_base = [channel / max_base_component for channel in base_color]
+        else:
+            normalized_base = [1.0, 1.0, 1.0]
+
+        dielectric_color = [
+            dielectric_f0 * ((1.0 - specular_tint) + specular_tint * normalized_base[i])
+            for i in range(3)
+        ]
+
+        specular_value = [
+            dielectric_color[i] * (1.0 - metallic) + base_color[i] * metallic
+            for i in range(3)
+        ]
+
         datablock["specular"] = {
-            "value": material.specular_color[0:3]
+            "value": specular_value
         }
         tex_filename = self.prepare_texture(bsdf.specular_texture)
         if tex_filename:
