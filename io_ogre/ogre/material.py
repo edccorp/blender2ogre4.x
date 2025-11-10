@@ -210,10 +210,10 @@ class OgreMaterialGenerator(object):
 
             if config.get('USE_FFP_PARAMETERS') is True:
                 self.w.iword('diffuse').round(color[0]*bf).round(color[1]*bf).round(color[2]*bf).round(alpha).nl()
-                self.w.iword('specular').round(sc[0]).round(sc[1]).round(sc[2]).round(alpha).round(si, 3).nl()
+                #self.w.iword('specular').round(sc[0]).round(sc[1]).round(sc[2]).round(alpha).round(si, 3).nl()
             else:
                 self.w.iword('diffuse').round(color[0]).round(color[1]).round(color[2]).round(alpha).nl()
-                self.w.iword('specular').round(sc[0]).round(sc[1]).round(sc[2]).round(alpha).round(si, 3).nl()
+                #self.w.iword('specular').round(sc[0]).round(sc[1]).round(sc[2]).round(alpha).round(si, 3).nl()
                 self.generate_rtshader_system(textures)
 
             for name in dir(mat):   #mat.items() - items returns custom props not pyRNA:
